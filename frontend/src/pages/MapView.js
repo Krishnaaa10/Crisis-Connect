@@ -316,83 +316,83 @@ const MapView = () => {
         <h1>Interactive Map Dashboard</h1>
         <SearchFilter onFilterChange={handleFilterChange} showDateFilter={true} />
         <div className="map-controls">
-          <div className="legend">
-            <h3>Legend</h3>
-            <div className="legend-item">
-              <span style={{ color: '#dc3545' }}>🔴</span> Critical Help Request
-            </div>
-            <div className="legend-item">
-              <span style={{ color: '#fd7e14' }}>🟠</span> High Priority
-            </div>
-            <div className="legend-item">
-              <span style={{ color: '#ffc107' }}>🟡</span> Medium Priority
-            </div>
-            <div className="legend-item">
-              <span style={{ color: '#28a745' }}>🟢</span> Low Priority
-            </div>
-            <div className="legend-item">
-              <span>🏠</span> Resources (Shelters, Food, Medical)
-            </div>
+        <div className="legend">
+          <h3>Legend</h3>
+          <div className="legend-item">
+            <span style={{ color: '#dc3545' }}>🔴</span> Critical Help Request
+          </div>
+          <div className="legend-item">
+            <span style={{ color: '#fd7e14' }}>🟠</span> High Priority
+          </div>
+          <div className="legend-item">
+            <span style={{ color: '#ffc107' }}>🟡</span> Medium Priority
+          </div>
+          <div className="legend-item">
+            <span style={{ color: '#28a745' }}>🟢</span> Low Priority
+          </div>
+          <div className="legend-item">
+            <span>🏠</span> Resources (Shelters, Food, Medical)
           </div>
         </div>
+      </div>
 
-        <div className="map-container">
-          <MapContainer
-            center={defaultCenter}
-            zoom={13}
-            style={{ height: '100%', width: '100%' }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
+      <div className="map-container">
+        <MapContainer
+          center={defaultCenter}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
 
-            {/* Help Request Markers */}
+          {/* Help Request Markers */}
             {filteredRequests.map((request) => {
               if (!request.location?.latitude || !request.location?.longitude) return null;
               return (
-                <Marker
-                  key={request._id}
-                  position={[request.location.latitude, request.location.longitude]}
-                  icon={new Icon({
-                    iconUrl: `data:image/svg+xml;base64,${btoa(
-                      `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25">
-                        <circle cx="12.5" cy="12.5" r="10" fill="${getPriorityColor(request.priority)}" stroke="white" stroke-width="2"/>
-                        <text x="12.5" y="17" text-anchor="middle" fill="white" font-size="12" font-weight="bold">!</text>
-                      </svg>`
-                    )}`,
-                    iconSize: [25, 25],
-                    iconAnchor: [12.5, 25]
-                  })}
-                >
-                  <Popup>
-                    <div className="popup-content">
-                      <h4>{request.title}</h4>
-                      <p>{request.description}</p>
-                      <div className="popup-details">
-                        <span className={`badge badge-${request.priority}`}>{request.priority}</span>
-                        <span className={`badge badge-${request.status}`}>{request.status}</span>
-                      </div>
-                      <p><strong>Category:</strong> {request.category}</p>
-                      {request.civilian && (
-                        <p><strong>From:</strong> {request.civilian.name}</p>
-                      )}
-                      {request.claimedBy && (
-                        <p><strong>Claimed by:</strong> {request.claimedBy.name}</p>
-                      )}
-                      {(user?.role === 'volunteer' || user?.role === 'admin') &&
-                        request.status === 'pending' && (
-                          <button
-                            onClick={() => handleClaimRequest(request._id)}
-                            className="btn btn-success"
-                            style={{ marginTop: '10px', width: '100%' }}
-                          >
-                            Claim Request
-                          </button>
-                        )}
-                    </div>
-                  </Popup>
-                </Marker>
+            <Marker
+              key={request._id}
+              position={[request.location.latitude, request.location.longitude]}
+              icon={new Icon({
+                iconUrl: `data:image/svg+xml;base64,${btoa(
+                  `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25">
+                    <circle cx="12.5" cy="12.5" r="10" fill="${getPriorityColor(request.priority)}" stroke="white" stroke-width="2"/>
+                    <text x="12.5" y="17" text-anchor="middle" fill="white" font-size="12" font-weight="bold">!</text>
+                  </svg>`
+                )}`,
+                iconSize: [25, 25],
+                iconAnchor: [12.5, 25]
+              })}
+            >
+              <Popup>
+                <div className="popup-content">
+                  <h4>{request.title}</h4>
+                  <p>{request.description}</p>
+                  <div className="popup-details">
+                    <span className={`badge badge-${request.priority}`}>{request.priority}</span>
+                    <span className={`badge badge-${request.status}`}>{request.status}</span>
+                  </div>
+                  <p><strong>Category:</strong> {request.category}</p>
+                  {request.civilian && (
+                    <p><strong>From:</strong> {request.civilian.name}</p>
+                  )}
+                  {request.claimedBy && (
+                    <p><strong>Claimed by:</strong> {request.claimedBy.name}</p>
+                  )}
+                  {(user?.role === 'volunteer' || user?.role === 'admin') &&
+                    request.status === 'pending' && (
+                      <button
+                        onClick={() => handleClaimRequest(request._id)}
+                        className="btn btn-success"
+                        style={{ marginTop: '10px', width: '100%' }}
+                      >
+                        Claim Request
+                      </button>
+                    )}
+                </div>
+              </Popup>
+            </Marker>
               );
             })}
 
@@ -436,62 +436,62 @@ const MapView = () => {
               );
             })}
 
-            {/* Resource Markers */}
+          {/* Resource Markers */}
             {resources.map((resource) => {
               if (!resource.location?.latitude || !resource.location?.longitude) return null;
               return (
-                <Marker
-                  key={resource._id}
-                  position={[resource.location.latitude, resource.location.longitude]}
-                  icon={new Icon({
-                    iconUrl: `data:image/svg+xml;base64,${btoa(
-                      `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
-                        <circle cx="15" cy="15" r="12" fill="#007bff" stroke="white" stroke-width="2"/>
-                        <text x="15" y="20" text-anchor="middle" fill="white" font-size="16">${getResourceIcon(resource.type)}</text>
-                      </svg>`
-                    )}`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 30]
-                  })}
-                >
-                  <Popup>
-                    <div className="popup-content">
-                      <h4>{resource.name}</h4>
-                      <p><strong>Type:</strong> {resource.type}</p>
-                      {resource.description && <p>{resource.description}</p>}
-                      {resource.capacity && (
-                        <p>
-                          <strong>Capacity:</strong> {resource.currentOccupancy}/{resource.capacity}
-                        </p>
-                      )}
-                      {resource.contact && (
-                        <div>
-                          {resource.contact.phone && <p><strong>Phone:</strong> {resource.contact.phone}</p>}
-                          {resource.contact.email && <p><strong>Email:</strong> {resource.contact.email}</p>}
-                        </div>
-                      )}
+            <Marker
+              key={resource._id}
+              position={[resource.location.latitude, resource.location.longitude]}
+              icon={new Icon({
+                iconUrl: `data:image/svg+xml;base64,${btoa(
+                  `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                    <circle cx="15" cy="15" r="12" fill="#007bff" stroke="white" stroke-width="2"/>
+                    <text x="15" y="20" text-anchor="middle" fill="white" font-size="16">${getResourceIcon(resource.type)}</text>
+                  </svg>`
+                )}`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 30]
+              })}
+            >
+              <Popup>
+                <div className="popup-content">
+                  <h4>{resource.name}</h4>
+                  <p><strong>Type:</strong> {resource.type}</p>
+                  {resource.description && <p>{resource.description}</p>}
+                  {resource.capacity && (
+                    <p>
+                      <strong>Capacity:</strong> {resource.currentOccupancy}/{resource.capacity}
+                    </p>
+                  )}
+                  {resource.contact && (
+                    <div>
+                      {resource.contact.phone && <p><strong>Phone:</strong> {resource.contact.phone}</p>}
+                      {resource.contact.email && <p><strong>Email:</strong> {resource.contact.email}</p>}
                     </div>
-                  </Popup>
-                </Marker>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
               );
             })}
-          </MapContainer>
-        </div>
+        </MapContainer>
+      </div>
 
-        <div className="map-summary">
-          <div className="summary-card">
-            <h3>Help Requests</h3>
+      <div className="map-summary">
+        <div className="summary-card">
+          <h3>Help Requests</h3>
             <p className="summary-number">{totalHelpRequests}</p>
-          </div>
-          <div className="summary-card">
-            <h3>Resources</h3>
-            <p className="summary-number">{totalResources}</p>
-          </div>
-          <div className="summary-card">
-            <h3>Pending Requests</h3>
-            <p className="summary-number">{totalPending}</p>
-          </div>
         </div>
+        <div className="summary-card">
+          <h3>Resources</h3>
+            <p className="summary-number">{totalResources}</p>
+        </div>
+        <div className="summary-card">
+          <h3>Pending Requests</h3>
+            <p className="summary-number">{totalPending}</p>
+        </div>
+      </div>
       </div>
     </div>
   );

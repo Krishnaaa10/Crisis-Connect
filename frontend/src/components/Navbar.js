@@ -15,50 +15,50 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="navbar">
-        <div className="container">
-          <Link to="/" className="navbar-brand">
-            🚨 Crisis Connect
-          </Link>
-          <div className="navbar-links">
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-            <Link to="/news">News</Link>
-            <Link to="/alerts">Alerts</Link>
-            <Link to="/contact">Contact</Link>
-            {user ? (
-              <>
-                <Link to="/map">Map View</Link>
+    <nav className="navbar">
+      <div className="container">
+        <Link to="/" className="navbar-brand">
+          🚨 Crisis Connect
+        </Link>
+        <div className="navbar-links">
+          <Link to="/">Home</Link>
+          <Link to="/about">About</Link>
+          <Link to="/news">News</Link>
+          <Link to="/alerts">Alerts</Link>
+          <Link to="/contact">Contact</Link>
+          {user ? (
+            <>
+              <Link to="/map">Map View</Link>
                 {user.role === 'civilian' && (
                   <Link to="/report-incident">Report Incident</Link>
                 )}
-                <Link to="/dashboard">Dashboard</Link>
+              <Link to="/dashboard">Dashboard</Link>
                 {user.role === 'volunteer' ? (
                   <>
-                    <Link to="/volunteer" className="volunteer-link">
-                      👷 Volunteer Portal
-                    </Link>
+                <Link to="/volunteer" className="volunteer-link">
+                  👷 Volunteer Portal
+                </Link>
                     <Link to="/volunteer/tasks">My Tasks</Link>
                   </>
-                ) : null}
-                <span className="user-name">{user.name}</span>
+              ) : null}
+              <span className="user-name">{user.name}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                  <button onClick={handleLogout} className="btn btn-secondary">
-                    Logout
-                  </button>
+              <button onClick={handleLogout} className="btn btn-secondary">
+                Logout
+              </button>
                   <ThemeToggle />
                 </div>
-              </>
-            ) : (
-              <>
-                <Link to="/login">Login</Link>
-                <Link to="/register">Register</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/register">Register</Link>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                   <ThemeToggle />
                 </div>
-              </>
-            )}
-          </div>
+            </>
+          )}
+        </div>
         </div>
       </nav>
 
@@ -83,9 +83,9 @@ const Navbar = () => {
                 <span className="admin-nav-icon">👷</span>
                 <span className="admin-nav-text">Volunteers</span>
               </Link>
-            </div>
-          </div>
-        </nav>
+        </div>
+      </div>
+    </nav>
       )}
     </>
   );
