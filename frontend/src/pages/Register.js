@@ -46,13 +46,25 @@ const Register = () => {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
       toast.success('Registration successful!');
-      // Navigate after a short delay to ensure state is updated
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 100);
+      // Navigate immediately - no delays
+      navigate('/dashboard');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Registration failed. Please try again.';
+      // Handle different error formats
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        // Validation errors
+        errorMessage = error.response.data.errors.map(err => err.msg || err.message).join(', ');
+      } else if (error.response?.data?.message) {
+        // Server error message
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        // Generic error message
+        errorMessage = error.message;
+      }
+      
       toast.error(errorMessage);
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -132,9 +144,16 @@ const Register = () => {
             <button 
               type="submit" 
               className="btn btn-primary auth-button"
-              disabled={isSubmitting || loading}
+              disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating Account...' : 'Create Account'}
+              {isSubmitting ? (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                  <div className="loading-spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div>
+                  Creating Account...
+                </span>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
           <div className="auth-footer">

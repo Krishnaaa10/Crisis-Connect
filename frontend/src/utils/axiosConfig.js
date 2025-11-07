@@ -27,10 +27,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout');
-      return Promise.reject(new Error('Request timeout. Please try again.'));
+    // Handle network errors (server not reachable)
+    if (!error.response) {
+      console.error('Network Error:', error.message);
+      if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+        return Promise.reject(new Error('Cannot connect to server. Please check if the backend is running on http://localhost:5000'));
+      }
+      if (error.code === 'ECONNABORTED') {
+        console.error('Request timeout');
+        return Promise.reject(new Error('Request timeout. Please try again.'));
+      }
+      return Promise.reject(new Error('Network error. Please check your connection and try again.'));
     }
+    
+    // Handle HTTP errors
     if (error.response?.status === 401) {
       // Don't redirect if we're already on login/register page or if it's a login/register request
       const isAuthRequest = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');

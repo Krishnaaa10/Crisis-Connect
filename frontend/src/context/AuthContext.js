@@ -47,69 +47,126 @@ export const AuthProvider = ({ children }) => {
       } else {
         setLoading(false);
       }
-    } else if (token && !isLoggingIn.current) {
-      // Token changed but we're not logging in, so fetch user
+    } else if (token && !isLoggingIn.current && !user) {
+      // Token changed but we're not logging in and don't have user, so fetch user
       fetchUser();
     }
-  }, [token, fetchUser]);
+  }, [token, fetchUser, user]);
 
   const login = async (email, password) => {
+    // Prevent multiple simultaneous login attempts
+    if (isLoggingIn.current) {
+      throw new Error('Login already in progress');
+    }
+
     try {
       isLoggingIn.current = true;
       setLoading(true);
       
       const response = await api.post('/api/auth/login', { email, password });
+      
+      // Check if response has the expected structure
+      if (!response.data || !response.data.token || !response.data.user) {
+        throw new Error('Invalid response from server');
+      }
+      
       const { token: newToken, user: userData } = response.data;
       
-      // Set token and user atomically to prevent race conditions
+      // Set token and user immediately
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(userData);
+      
+      // Reset flags immediately - no delays
       setLoading(false);
+      isLoggingIn.current = false;
       
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
+      
+      // Clean up on error
       setLoading(false);
+      isLoggingIn.current = false;
       setUser(null);
       setToken(null);
       localStorage.removeItem('token');
+      
+      // Handle network errors first
+      if (!error.response) {
+        // Network error - server not reachable
+        if (error.message && error.message.includes('connect')) {
+          error.message = 'Cannot connect to server. Please ensure the backend is running on http://localhost:5000';
+        }
+        throw error;
+      }
+      
+      // Format error message properly for HTTP errors
+      if (error.response?.data) {
+        // Handle validation errors
+        if (error.response.data.errors && Array.isArray(error.response.data.errors)) {
+          const errorMessage = error.response.data.errors.map(err => err.msg || err.message).join(', ');
+          error.message = errorMessage;
+        } else if (error.response.data.message) {
+          error.message = error.response.data.message;
+        }
+      }
+      
       throw error;
-    } finally {
-      // Reset login flag after a short delay to allow state to settle
-      setTimeout(() => {
-        isLoggingIn.current = false;
-      }, 100);
     }
   };
 
   const register = async (userData) => {
+    // Prevent multiple simultaneous register attempts
+    if (isLoggingIn.current) {
+      throw new Error('Registration already in progress');
+    }
+
     try {
       isLoggingIn.current = true;
       setLoading(true);
       
       const response = await api.post('/api/auth/register', userData);
+      
+      // Check if response has the expected structure
+      if (!response.data || !response.data.token || !response.data.user) {
+        throw new Error('Invalid response from server');
+      }
+      
       const { token: newToken, user: newUser } = response.data;
       
-      // Set token and user atomically to prevent race conditions
+      // Set token and user immediately
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(newUser);
+      
+      // Reset flags immediately - no delays
       setLoading(false);
+      isLoggingIn.current = false;
       
       return response.data;
     } catch (error) {
       console.error('Register error:', error);
+      
+      // Clean up on error
       setLoading(false);
+      isLoggingIn.current = false;
       setUser(null);
       setToken(null);
       localStorage.removeItem('token');
+      
+      // Format error message properly
+      if (error.response?.data) {
+        // Handle validation errors
+        if (error.response.data.errors && Array.isArray(error.response.data.errors)) {
+          const errorMessage = error.response.data.errors.map(err => err.msg || err.message).join(', ');
+          error.message = errorMessage;
+        } else if (error.response.data.message) {
+          error.message = error.response.data.message;
+        }
+      }
+      
       throw error;
-    } finally {
-      // Reset login flag after a short delay to allow state to settle
-      setTimeout(() => {
-        isLoggingIn.current = false;
-      }, 100);
     }
   };
 
