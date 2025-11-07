@@ -195,14 +195,7 @@ The application uses Socket.io for real-time updates:
 
 ## Deployment
 
-This project can be deployed to Render. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed step-by-step instructions.
-
-### Quick Deployment Checklist
-
-1. **Set up MongoDB Atlas** (free tier available)
-2. **Deploy Backend** as a Web Service on Render
-3. **Deploy Frontend** as a Static Site on Render
-4. **Configure Environment Variables** (see DEPLOYMENT.md)
+This project can be deployed to various platforms like Render, Vercel, or Heroku.
 
 ### Environment Variables Required
 
@@ -210,12 +203,18 @@ This project can be deployed to Render. See [DEPLOYMENT.md](./DEPLOYMENT.md) for
 - `MONGODB_URI` - MongoDB Atlas connection string
 - `JWT_SECRET` - Secret key for JWT tokens
 - `CLIENT_URL` - Frontend URL (set after frontend deployment)
-- `PORT` - Server port (Render auto-assigns, use `process.env.PORT`)
+- `PORT` - Server port (platform auto-assigns, use `process.env.PORT`)
 
 **Frontend:**
 - `REACT_APP_API_URL` - Backend API URL
 
-For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+### Quick Deployment Steps
+
+1. **Set up MongoDB Atlas** (free tier available)
+2. **Deploy Backend** as a Web Service
+3. **Deploy Frontend** as a Static Site
+4. **Configure Environment Variables** as listed above
+5. **Update CORS settings** in backend to allow your frontend URL
 
 ## Development
 
