@@ -237,9 +237,19 @@ const VolunteerDashboard = () => {
                 <h3>Pending Action</h3>
                 <p className="stat-number">{tasks.filter(t => t.status === 1).length}</p>
               </div>
-              <div className="stat-card">
-                <h3>Accepted</h3>
-                <p className="stat-number">{tasks.filter(t => t.status === 2).length}</p>
+              <div className="stat-card" style={{ 
+                border: '2px solid rgba(40, 167, 69, 0.5)',
+                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%)'
+              }}>
+                <h3>✅ Accepted</h3>
+                <p className="stat-number" style={{ 
+                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  {tasks.filter(t => t.status === 2).length}
+                </p>
               </div>
               <div className="stat-card">
                 <h3>Completed</h3>
@@ -250,8 +260,16 @@ const VolunteerDashboard = () => {
             <div className="task-list-section">
               <h2>My Assigned Tasks</h2>
               <div className="tasks-grid">
-                {tasks.map(task => (
-                  <div key={task._id} className="card task-card">
+                {[...tasks].sort((a, b) => {
+                  // Sort: Accepted (2) first, then Assigned (1), then Completed (4), then Rejected (3)
+                  const priority = { 2: 1, 1: 2, 4: 3, 3: 4 };
+                  return (priority[a.status] || 5) - (priority[b.status] || 5);
+                }).map(task => (
+                  <div 
+                    key={task._id} 
+                    className="task-card"
+                    data-status={task.status}
+                  >
                     <div className="task-header">
                       <div>
                         <h3>{task.taskType}</h3>
