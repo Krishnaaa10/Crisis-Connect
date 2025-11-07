@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SearchFilter from '../components/SearchFilter';
@@ -12,6 +13,7 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // State
@@ -85,6 +87,48 @@ const Dashboard = () => {
     },
     enabled: !!(user?._id || user?.id) && user?.role === 'civilian',
     refetchInterval: 30000, // Auto-refresh every 30 seconds
+  });
+
+  // Fetch volunteer profile for volunteers
+  const { 
+    data: volunteerProfile, 
+    isLoading: volunteerProfileLoading 
+  } = useQuery({
+    queryKey: ['volunteerProfile', user?._id || user?.id],
+    queryFn: async () => {
+      const userId = user?._id || user?.id;
+      if (!userId) return null;
+      try {
+        const response = await api.get(`/api/tasks/user/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error('Dashboard: Error fetching volunteer profile:', error);
+        return null;
+      }
+    },
+    enabled: !!(user?._id || user?.id) && (user?.role === 'volunteer' || user?.role === 'admin'),
+    retry: 2,
+  });
+
+  // Fetch tasks for volunteers
+  const { 
+    data: volunteerTasks = [], 
+    isLoading: volunteerTasksLoading,
+    refetch: refetchVolunteerTasks
+  } = useQuery({
+    queryKey: ['volunteerTasks', volunteerProfile?._id],
+    queryFn: async () => {
+      if (!volunteerProfile?._id) return [];
+      try {
+        const response = await api.get(`/api/tasks/volunteer/${volunteerProfile._id}`);
+        return response.data || [];
+      } catch (error) {
+        console.error('Dashboard: Error fetching volunteer tasks:', error);
+        return [];
+      }
+    },
+    enabled: !!volunteerProfile?._id && (user?.role === 'volunteer' || user?.role === 'admin'),
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
   // Combine incidents and help requests into unified array
@@ -516,7 +560,80 @@ const Dashboard = () => {
     createIncidentMutation.mutate(submitData);
   };
 
-  const loading = requestsLoading;
+  // Calculate stats - MUST be before any conditional returns
+  const stats = useMemo(() => {
+    console.log('Dashboard: Calculating stats - Role:', user?.role, 'VolunteerTasks:', volunteerTasks?.length, volunteerTasks);
+    
+    if (user?.role === 'volunteer' || user?.role === 'admin') {
+      // Volunteer stats based on tasks
+      const totalTasks = volunteerTasks?.length || 0;
+      const pendingTasks = volunteerTasks?.filter(t => t.status === 1).length || 0; // Assigned
+      const activeTasks = volunteerTasks?.filter(t => t.status === 2).length || 0; // Accepted
+      const completedTasks = volunteerTasks?.filter(t => t.status === 4).length || 0; // Completed
+      
+      console.log('Dashboard: Volunteer stats calculated:', { totalTasks, pendingTasks, activeTasks, completedTasks });
+      
+      return {
+        totalReports: totalTasks,
+        pendingReports: pendingTasks,
+        activeReports: activeTasks,
+        completedReports: completedTasks
+      };
+    } else {
+      // Civilian stats based on incidents/requests
+      const totalReports = allItems?.length || 0;
+      const pendingReports = allItems?.filter(item => 
+        (item._itemType === 'incident' && item.status === 0) || 
+        (item._itemType === 'helpRequest' && item.status === 'pending')
+      ).length || 0;
+      const activeReports = allItems?.filter(item => 
+        (item._itemType === 'incident' && (item.status === 1 || item.status === 2)) || 
+        (item._itemType === 'helpRequest' && item.status === 'claimed')
+      ).length || 0;
+      const completedReports = allItems?.filter(item => 
+        (item._itemType === 'incident' && item.status === 3) || 
+        (item._itemType === 'helpRequest' && item.status === 'completed')
+      ).length || 0;
+      
+      console.log('Dashboard: Civilian stats calculated:', { totalReports, pendingReports, activeReports, completedReports });
+      
+      return {
+        totalReports,
+        pendingReports,
+        activeReports,
+        completedReports
+      };
+    }
+  }, [allItems, volunteerTasks, user?.role]);
+
+  // Get recent activity (last 5 items) - MUST be before any conditional returns
+  const recentActivity = useMemo(() => {
+    if (user?.role === 'volunteer' || user?.role === 'admin') {
+      // For volunteers, show recent tasks
+      return [...volunteerTasks]
+        .sort((a, b) => new Date(b.createdAt || b.assignedAt) - new Date(a.createdAt || a.assignedAt))
+        .slice(0, 5)
+        .map(task => ({
+          _itemId: task._id,
+          _itemType: 'task',
+          displayType: task.taskType || 'Task',
+          displayDescription: task.description || '',
+          displayLocation: task.incident?.location || 'Unknown',
+          displayCreatedAt: task.createdAt || task.assignedAt,
+          status: task.status,
+          displayStatus: task.status === 1 ? 0 : task.status === 2 ? 2 : task.status === 4 ? 3 : 0
+        }));
+    } else {
+      // For civilians, show recent incidents/requests
+      return [...allItems]
+        .sort((a, b) => new Date(b.displayCreatedAt) - new Date(a.displayCreatedAt))
+        .slice(0, 5);
+    }
+  }, [allItems, volunteerTasks, user?.role]);
+
+  const loading = user?.role === 'civilian' 
+    ? requestsLoading 
+    : (volunteerProfileLoading || volunteerTasksLoading);
 
   if (authLoading) {
     return (
@@ -530,8 +647,141 @@ const Dashboard = () => {
   return (
     <div className="dashboard-page">
       <div className="container">
-        <h1>Dashboard</h1>
-        <p>Welcome, {user?.name}!</p>
+        <div className="dashboard-header">
+          <div>
+            <h1>📊 Dashboard</h1>
+            <p className="dashboard-welcome">Welcome back, {user?.name}! Here's your overview.</p>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        {loading ? (
+          <div className="dashboard-stats">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="stat-card-dashboard">
+                <div className="stat-icon">⏳</div>
+                <div className="stat-content">
+                  <h3>Loading...</h3>
+                  <p className="stat-number-dashboard">-</p>
+                  <span className="stat-label">Please wait</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="dashboard-stats">
+            <div className="stat-card-dashboard">
+              <div className="stat-icon">{user?.role === 'volunteer' || user?.role === 'admin' ? '📋' : '📋'}</div>
+              <div className="stat-content">
+                <h3>{user?.role === 'volunteer' || user?.role === 'admin' ? 'Total Tasks' : 'Total Reports'}</h3>
+                <p className="stat-number-dashboard">{stats.totalReports}</p>
+                <span className="stat-label">{user?.role === 'volunteer' || user?.role === 'admin' ? 'All your tasks' : 'All your reports'}</span>
+              </div>
+            </div>
+            <div className="stat-card-dashboard stat-pending">
+              <div className="stat-icon">⏳</div>
+              <div className="stat-content">
+                <h3>{user?.role === 'volunteer' || user?.role === 'admin' ? 'Assigned' : 'Pending'}</h3>
+                <p className="stat-number-dashboard">{stats.pendingReports}</p>
+                <span className="stat-label">{user?.role === 'volunteer' || user?.role === 'admin' ? 'Awaiting acceptance' : 'Awaiting action'}</span>
+              </div>
+            </div>
+            <div className="stat-card-dashboard stat-active">
+              <div className="stat-icon">🔄</div>
+              <div className="stat-content">
+                <h3>{user?.role === 'volunteer' || user?.role === 'admin' ? 'Accepted' : 'Active'}</h3>
+                <p className="stat-number-dashboard">{stats.activeReports}</p>
+                <span className="stat-label">{user?.role === 'volunteer' || user?.role === 'admin' ? 'Tasks in progress' : 'In progress'}</span>
+              </div>
+            </div>
+            <div className="stat-card-dashboard stat-completed">
+              <div className="stat-icon">✅</div>
+              <div className="stat-content">
+                <h3>Completed</h3>
+                <p className="stat-number-dashboard">{stats.completedReports}</p>
+                <span className="stat-label">Resolved</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="dashboard-quick-actions">
+          <h2 className="section-title">Quick Actions</h2>
+          <div className="quick-actions-grid">
+            {user?.role === 'civilian' && (
+              <button 
+                onClick={() => setShowForm(!showForm)}
+                className="quick-action-btn"
+              >
+                <span className="action-icon">🚨</span>
+                <span className="action-text">Report Incident</span>
+              </button>
+            )}
+            {(user?.role === 'volunteer' || user?.role === 'admin') && (
+              <button 
+                onClick={() => navigate('/volunteer')}
+                className="quick-action-btn"
+              >
+                <span className="action-icon">👷</span>
+                <span className="action-text">My Tasks</span>
+              </button>
+            )}
+            <button 
+              onClick={() => navigate('/map')}
+              className="quick-action-btn"
+            >
+              <span className="action-icon">🗺️</span>
+              <span className="action-text">View Map</span>
+            </button>
+            <button 
+              onClick={() => navigate('/alerts')}
+              className="quick-action-btn"
+            >
+              <span className="action-icon">🔔</span>
+              <span className="action-text">View Alerts</span>
+            </button>
+            <button 
+              onClick={() => navigate('/contact')}
+              className="quick-action-btn"
+            >
+              <span className="action-icon">📞</span>
+              <span className="action-text">Contact Support</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        {recentActivity.length > 0 && (
+          <div className="dashboard-recent-activity">
+            <h2 className="section-title">Recent Activity</h2>
+            <div className="activity-list">
+              {recentActivity.map((item, index) => (
+                <div key={item._itemId || index} className="activity-item">
+                  <div className="activity-icon">
+                    {item._itemType === 'task' ? '📋' : item._itemType === 'incident' ? '⚠️' : '🆘'}
+                  </div>
+                  <div className="activity-content">
+                    <h4>{item.displayType}</h4>
+                    <p>{item.displayDescription?.substring(0, 60) || 'No description'}...</p>
+                    <span className="activity-time">
+                      {new Date(item.displayCreatedAt).toLocaleDateString()} • {item.displayLocation}
+                    </span>
+                  </div>
+                  <div className="activity-status">
+                    <span className={`status-badge status-${item.displayStatus === 0 || item.status === 'pending' || item.status === 1 ? 'pending' : item.displayStatus === 3 || item.status === 'completed' || item.status === 4 ? 'completed' : 'active'}`}>
+                      {item._itemType === 'task' 
+                        ? (item.status === 1 ? 'Assigned' : item.status === 2 ? 'Accepted' : item.status === 4 ? 'Completed' : item.status === 3 ? 'Rejected' : 'Unknown')
+                        : item._itemType === 'incident' 
+                        ? (['Pending', 'Verified', 'Ongoing', 'Completed'][item.status] || 'Unknown')
+                        : (item.status === 'pending' ? 'Pending' : item.status === 'claimed' ? 'Claimed' : item.status === 'completed' ? 'Completed' : item.status)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {user?.role === 'civilian' && (
           <div className="dashboard-actions">
