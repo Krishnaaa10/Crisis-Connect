@@ -3,7 +3,7 @@ import axios from 'axios';
 // Configure axios defaults
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
-  timeout: 10000, // 10 second timeout
+  timeout: 30000, // 30 second timeout - increased for slower connections
   headers: {
     'Content-Type': 'application/json',
   },
@@ -32,8 +32,23 @@ api.interceptors.response.use(
       return Promise.reject(new Error('Request timeout. Please try again.'));
     }
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect if we're already on login/register page or if it's a login/register request
+      const isAuthRequest = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+      const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+      
+      if (!isAuthRequest && !isAuthPage) {
+        // Only redirect if we have a token (meaning it expired/invalid)
+        const token = localStorage.getItem('token');
+        if (token) {
+          localStorage.removeItem('token');
+          // Use a small delay to prevent race conditions
+          setTimeout(() => {
+            if (window.location.pathname !== '/login') {
+              window.location.href = '/login';
+            }
+          }, 100);
+        }
+      }
     }
     return Promise.reject(error);
   }

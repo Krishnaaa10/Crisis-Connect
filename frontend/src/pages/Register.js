@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -13,8 +13,16 @@ const Register = () => {
     role: 'civilian',
     phone: ''
   });
-  const { register } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register, user, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,17 +30,30 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
+    
+    setIsSubmitting(true);
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
       toast.success('Registration successful!');
-      navigate('/dashboard');
+      // Navigate after a short delay to ensure state is updated
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 100);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed. Please try again.';
+      toast.error(errorMessage);
+      setIsSubmitting(false);
     }
   };
 
@@ -108,8 +129,12 @@ const Register = () => {
                 placeholder="Enter your phone number"
               />
             </div>
-            <button type="submit" className="btn btn-primary auth-button">
-              Create Account
+            <button 
+              type="submit" 
+              className="btn btn-primary auth-button"
+              disabled={isSubmitting || loading}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
           <div className="auth-footer">

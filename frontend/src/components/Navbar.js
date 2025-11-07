@@ -5,13 +5,16 @@ import ThemeToggle from './ThemeToggle';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
+
+  // Don't render user-specific content while loading to prevent flashing
+  const isLoadingAuth = loading;
 
   return (
     <>
@@ -26,7 +29,7 @@ const Navbar = () => {
           <Link to="/news">News</Link>
           <Link to="/alerts">Alerts</Link>
           <Link to="/contact">Contact</Link>
-          {user ? (
+          {!isLoadingAuth && user ? (
             <>
               <Link to="/map">Map View</Link>
                 {user.role === 'civilian' && (
@@ -49,7 +52,7 @@ const Navbar = () => {
                   <ThemeToggle />
                 </div>
             </>
-          ) : (
+          ) : !isLoadingAuth ? (
             <>
               <Link to="/login">Login</Link>
               <Link to="/register">Register</Link>
@@ -57,13 +60,13 @@ const Navbar = () => {
                   <ThemeToggle />
                 </div>
             </>
-          )}
+          ) : null}
         </div>
         </div>
       </nav>
 
       {/* Admin Second Navbar Row */}
-      {user && user.role === 'admin' && (
+      {!isLoadingAuth && user && user.role === 'admin' && (
         <nav className="navbar-admin-second">
           <div className="container">
             <div className="admin-nav-links">
