@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 import './Navbar.css';
@@ -7,6 +7,7 @@ import './Navbar.css';
 const Navbar = () => {
   const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -18,34 +19,66 @@ const Navbar = () => {
 
   return (
     <>
-    <nav className="navbar">
+    <nav className="navbar navbar-home">
       <div className="container">
         <Link to="/" className="navbar-brand">
-          🚨 Crisis Connect
+          <span className="brand-icon">🚨</span>
+          <span className="brand-text">
+            <span className="brand-main">Crisis</span>
+            <span className="brand-sub">Connect</span>
+          </span>
         </Link>
         <div className="navbar-links">
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-          <Link to="/news">News</Link>
-          <Link to="/alerts">Alerts</Link>
-          <Link to="/contact">Contact</Link>
+          <Link to="/" className="nav-link-home">
+            <span className="nav-icon">🏠</span>
+            <span>Home</span>
+          </Link>
+          <Link to="/about" className="nav-link-home">
+            <span className="nav-icon">ℹ️</span>
+            <span>About</span>
+          </Link>
+          <Link to="/news" className="nav-link-home">
+            <span className="nav-icon">📰</span>
+            <span>News</span>
+          </Link>
+          <Link to="/alerts" className="nav-link-home">
+            <span className="nav-icon">🔔</span>
+            <span>Alerts</span>
+          </Link>
+          <Link to="/contact" className="nav-link-home">
+            <span className="nav-icon">📞</span>
+            <span>Contact</span>
+          </Link>
           {!isLoadingAuth && user ? (
             <>
-              <Link to="/map">Map View</Link>
+              <Link to="/map" className="nav-link-home">
+                <span className="nav-icon">🗺️</span>
+                <span>Map View</span>
+              </Link>
                 {user.role === 'civilian' && (
-                  <Link to="/report-incident">Report Incident</Link>
+                  <Link to="/report-incident" className="nav-link-home">
+                    <span className="nav-icon">📝</span>
+                    <span>Report Incident</span>
+                  </Link>
                 )}
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/dashboard" className="nav-link-home">
+                <span className="nav-icon">📊</span>
+                <span>Dashboard</span>
+              </Link>
                 {user.role === 'volunteer' ? (
                   <>
-                <Link to="/volunteer" className="volunteer-link">
-                  👷 Volunteer Portal
+                <Link to="/volunteer" className="nav-link-home volunteer-link">
+                  <span className="nav-icon">👷</span>
+                  <span>Volunteer Portal</span>
                 </Link>
-                    <Link to="/volunteer/tasks">My Tasks</Link>
+                    <Link to="/volunteer/tasks" className="nav-link-home">
+                      <span className="nav-icon">✅</span>
+                      <span>My Tasks</span>
+                    </Link>
                   </>
               ) : null}
               <span className="user-name">{user.name}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
               <button onClick={handleLogout} className="btn btn-secondary">
                 Logout
               </button>
@@ -54,9 +87,15 @@ const Navbar = () => {
             </>
           ) : !isLoadingAuth ? (
             <>
-              <Link to="/login">Login</Link>
-              <Link to="/register">Register</Link>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+              <Link to="/login" className="nav-link-home">
+                <span className="nav-icon">🔐</span>
+                <span>Login</span>
+              </Link>
+              <Link to="/register" className="nav-link-home">
+                <span className="nav-icon">📝</span>
+                <span>Register</span>
+              </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                   <ThemeToggle />
                 </div>
             </>
