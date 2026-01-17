@@ -18,12 +18,13 @@ const IncidentManagement = () => {
     queryKey: ['pendingIncidents'],
     queryFn: async () => {
       console.log('IncidentManagement: Fetching pending incidents...');
-      const response = await api.get('/api/incidents/public-reports');
-      console.log('IncidentManagement: Received pending incidents:', response.data?.length || 0);
-      return response.data || [];
+      // Changed from /public-reports to ?status=0 (Pending)
+      const response = await api.get('/api/incidents?status=0');
+      console.log('IncidentManagement: Received pending incidents:', response.data?.data?.length || 0);
+      return response.data?.data || [];
     },
     enabled: !!user && user.role === 'admin',
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchInterval: 5000,
   });
 
   // Fetch all incidents
@@ -32,11 +33,11 @@ const IncidentManagement = () => {
     queryFn: async () => {
       console.log('IncidentManagement: Fetching all incidents...');
       const response = await api.get('/api/incidents');
-      console.log('IncidentManagement: Received all incidents:', response.data?.length || 0);
-      return response.data || [];
+      console.log('IncidentManagement: Received all incidents:', response.data?.data?.length || 0);
+      return response.data?.data || [];
     },
     enabled: !!user && user.role === 'admin',
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchInterval: 5000,
   });
 
   // Socket setup for real-time updates
@@ -77,7 +78,8 @@ const IncidentManagement = () => {
   // Verify incident mutation
   const verifyIncidentMutation = useMutation({
     mutationFn: async (incidentId) => {
-      return api.put(`/api/incidents/verify/${incidentId}`);
+      // Endpoint is /api/incidents/:id/verify
+      return api.put(`/api/incidents/${incidentId}/verify`);
     },
     onSuccess: () => {
       toast.success('Incident verified and volunteers notified!');
@@ -124,23 +126,23 @@ const IncidentManagement = () => {
   };
 
   return (
-    <div className="incident-management-page">
+    <div
+      className="incident-management-page"
+      style={{
+        backgroundImage: `linear-gradient(rgba(5, 10, 20, 0.85), rgba(5, 10, 20, 0.85)), url(${process.env.PUBLIC_URL}/assets/admin_bg.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        minHeight: '100vh',
+        paddingTop: '100px'
+      }}
+    >
       <div className="incident-management-container">
         <div className="incident-management-header">
           <h2>🚨 Incident Management</h2>
           <p>Review and verify incidents reported by civilians</p>
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-            <button
-              onClick={() => {
-                refetchPending();
-                refetchAll();
-                toast.info('Refreshing incidents...');
-              }}
-              className="btn btn-secondary"
-              style={{ fontSize: '14px', padding: '8px 16px' }}
-            >
-              🔄 Refresh
-            </button>
+            {/* Auto-refreshes enabled */}
           </div>
         </div>
 

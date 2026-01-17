@@ -1,136 +1,143 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import ThemeToggle from './ThemeToggle';
+import { FaBars, FaTimes, FaHome, FaInfoCircle, FaNewspaper, FaBell, FaPhone, FaMapMarkedAlt, FaFileAlt, FaChartLine, FaUserShield, FaTasks, FaUsers, FaSignInAlt, FaUserPlus, FaSignOutAlt } from 'react-icons/fa';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, logout, loading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+    const { user, logout, loading } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+    // Handle scroll effect
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 20) {
+                setScrolled(true);
+            } else {
+                setScrolled(false);
+            }
+        };
 
-  // Don't render user-specific content while loading to prevent flashing
-  const isLoadingAuth = loading;
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-  return (
-    <>
-    <nav className="navbar navbar-home">
-      <div className="container">
-        <Link to="/" className="navbar-brand">
-          <span className="brand-icon">🚨</span>
-          <span className="brand-text">
-            <span className="brand-main">Crisis</span>
-            <span className="brand-sub">Connect</span>
-          </span>
-        </Link>
-        <div className="navbar-links">
-          <Link to="/" className="nav-link-home">
-            <span className="nav-icon">🏠</span>
-            <span>Home</span>
-          </Link>
-          <Link to="/about" className="nav-link-home">
-            <span className="nav-icon">ℹ️</span>
-            <span>About</span>
-          </Link>
-          <Link to="/news" className="nav-link-home">
-            <span className="nav-icon">📰</span>
-            <span>News</span>
-          </Link>
-          <Link to="/alerts" className="nav-link-home">
-            <span className="nav-icon">🔔</span>
-            <span>Alerts</span>
-          </Link>
-          <Link to="/contact" className="nav-link-home">
-            <span className="nav-icon">📞</span>
-            <span>Contact</span>
-          </Link>
-          {!isLoadingAuth && user ? (
-            <>
-              <Link to="/map" className="nav-link-home">
-                <span className="nav-icon">🗺️</span>
-                <span>Map View</span>
-              </Link>
-                {user.role === 'civilian' && (
-                  <Link to="/report-incident" className="nav-link-home">
-                    <span className="nav-icon">📝</span>
-                    <span>Report Incident</span>
-                  </Link>
-                )}
-              <Link to="/dashboard" className="nav-link-home">
-                <span className="nav-icon">📊</span>
-                <span>Dashboard</span>
-              </Link>
-                {user.role === 'volunteer' ? (
-                  <>
-                <Link to="/volunteer" className="nav-link-home volunteer-link">
-                  <span className="nav-icon">👷</span>
-                  <span>Volunteer Portal</span>
+    // Close mobile menu on route change
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [location]);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    // Don't render user-specific content while loading
+    const isLoadingAuth = loading;
+
+    // Helper to check active route
+    const isActive = (path) => location.pathname === path ? 'active' : '';
+
+    return (
+        <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
+            <div className="navbar-container">
+                {/* Brand Section */}
+                <Link
+                    to={user ? (user.role === 'admin' ? '/admin' : user.role === 'volunteer' ? '/volunteer' : '/dashboard') : '/'}
+                    className="navbar-brand"
+                >
+                    <span className="brand-icon">🚨</span>
+                    <div className="brand-text">
+                        <span className="brand-main">Crisis</span>
+                        <span className="brand-sub">Connect</span>
+                    </div>
                 </Link>
-                    <Link to="/volunteer/tasks" className="nav-link-home">
-                      <span className="nav-icon">✅</span>
-                      <span>My Tasks</span>
-                    </Link>
-                  </>
-              ) : null}
-              <span className="user-name">{user.name}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-              <button onClick={handleLogout} className="btn btn-secondary">
-                Logout
-              </button>
-                  <ThemeToggle />
-                </div>
-            </>
-          ) : !isLoadingAuth ? (
-            <>
-              <Link to="/login" className="nav-link-home">
-                <span className="nav-icon">🔐</span>
-                <span>Login</span>
-              </Link>
-              <Link to="/register" className="nav-link-home">
-                <span className="nav-icon">📝</span>
-                <span>Register</span>
-              </Link>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                  <ThemeToggle />
-                </div>
-            </>
-          ) : null}
-        </div>
-        </div>
-      </nav>
 
-      {/* Admin Second Navbar Row */}
-      {!isLoadingAuth && user && user.role === 'admin' && (
-        <nav className="navbar-admin-second">
-          <div className="container">
-            <div className="admin-nav-links">
-              <Link to="/volunteer/tasks" className="admin-nav-btn">
-                <span className="admin-nav-icon">📋</span>
-                <span className="admin-nav-text">My Tasks</span>
-              </Link>
-              <Link to="/admin/incidents" className="admin-nav-btn">
-                <span className="admin-nav-icon">🚨</span>
-                <span className="admin-nav-text">Incidents</span>
-              </Link>
-              <Link to="/admin/tasks" className="admin-nav-btn">
-                <span className="admin-nav-icon">✅</span>
-                <span className="admin-nav-text">Tasks</span>
-              </Link>
-              <Link to="/admin/volunteers" className="admin-nav-btn">
-                <span className="admin-nav-icon">👷</span>
-                <span className="admin-nav-text">Volunteers</span>
-              </Link>
-        </div>
-      </div>
-    </nav>
-      )}
-    </>
-  );
+                {/* Mobile Hamburger Toggle */}
+                <div className="mobile-toggle" onClick={toggleMobileMenu}>
+                    {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+                </div>
+
+                {/* Desktop & Tablet Navigation */}
+                <div className={`navbar-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+                    <div className="nav-links-left">
+                        <Link to="/" className={`nav-link ${isActive('/')}`}>
+                            <FaHome className="link-icon" /> Home
+                        </Link>
+                        <Link to="/about" className={`nav-link ${isActive('/about')}`}>
+                            <FaInfoCircle className="link-icon" /> About
+                        </Link>
+                        {!user || user.role !== 'admin' ? (
+                            <Link to="/alerts" className={`nav-link ${isActive('/alerts')}`}>
+                                <FaBell className="link-icon" /> Alerts
+                            </Link>
+                        ) : null}
+                        <Link to="/news" className={`nav-link ${isActive('/news')}`}>
+                            <FaNewspaper className="link-icon" /> News
+                        </Link>
+                        <Link to="/contact" className={`nav-link ${isActive('/contact')}`}>
+                            <FaPhone className="link-icon" /> Contact
+                        </Link>
+                    </div>
+
+                    <div className="nav-actions-right">
+                        {!isLoadingAuth && user ? (
+                            <>
+                                <div className="user-menu-items">
+
+
+                                    {user.role === 'civilian' && (
+                                        <Link to="/report-incident" className={`nav-link ${isActive('/report-incident')}`}>
+                                            <FaFileAlt className="link-icon" /> Report
+                                        </Link>
+                                    )}
+
+                                    <Link to={user.role === 'admin' ? "/admin" : user.role === 'volunteer' ? "/volunteer" : "/dashboard"} className={`nav-link ${isActive('/dashboard') || isActive('/admin') || isActive('/volunteer')}`}>
+                                        <FaChartLine className="link-icon" /> Dashboard
+                                    </Link>
+
+                                    {/* Admin Quick Links shown in main nav on mobile, or if needed */}
+                                    {user.role === 'admin' && (
+                                        <div className="admin-items-mobile-only">
+                                            <Link to="/admin/incidents" className={`nav-link ${isActive('/admin/incidents')}`}>
+                                                <FaUserShield /> Admin
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="user-profile-actions">
+                                    <span className="user-greeting">Hi, {user.name.split(' ')[0]}</span>
+                                    <button onClick={handleLogout} className="btn-logout">
+                                        <FaSignOutAlt />
+                                    </button>
+                                </div>
+                            </>
+                        ) : !isLoadingAuth ? (
+                            <div className="auth-buttons">
+                                <Link to="/login" className="btn-login-ghost">
+                                    <FaSignInAlt className="btn-icon" /> Login
+                                </Link>
+                                <Link to="/register" className="btn-register-primary">
+                                    <FaUserPlus className="btn-icon" /> Get Started
+                                </Link>
+                            </div>
+                        ) : null}
+                    </div>
+                </div>
+            </div>
+
+            {/* Admin Second Navbar Row - Desktop Only */}
+            {/* Admin Second Navbar Row - Removed as per modular dashboard design */}
+        </nav>
+    );
 };
 
 export default Navbar;

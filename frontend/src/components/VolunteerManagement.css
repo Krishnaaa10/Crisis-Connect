@@ -1,195 +1,213 @@
+/* Inherit main background from Admin Dashboard if nested, or set it explicitly */
 .volunteer-management-container {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
+  /* Mimic Admin Dashboard Background if standalone */
+  background-color: #050a14;
+  color: #e0e6ed;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  padding: 30px;
+  padding-top: 100px;
+  background-color: #050a14;
+  color: #e0e6ed;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  padding: 30px;
+  padding-top: 100px;
+  /* Added to prevent Navbar overlap */
 }
 
+/* --- Header Section --- */
 .volunteer-management-header {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 30px;
+  padding: 20px 30px;
+  background: rgba(10, 15, 30, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .volunteer-management-header h2 {
-  color: var(--text-primary);
-  margin-bottom: 10px;
-}
-
-.volunteer-management-header p {
-  color: var(--text-secondary);
-}
-
-.no-volunteers {
-  text-align: center;
-  padding: 40px;
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-}
-
-.volunteer-list {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #fff, #00f0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.volunteer-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: var(--shadow);
-  border-left: 4px solid var(--primary-color);
-}
-
-.volunteer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 15px;
 }
 
+.volunteer-management-header p {
+  color: #8da2b5;
+  margin: 5px 0 0 0;
+  font-size: 14px;
+}
+
+/* Total Count Badge in Header */
+.volunteer-management-header h2 span {
+  font-size: 12px;
+  background: rgba(0, 240, 255, 0.1);
+  color: #00f0ff;
+  border: 1px solid #00f0ff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  -webkit-text-fill-color: #00f0ff;
+  /* Reset gradient for badge */
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+/* --- Grid Layout for Cards --- */
+.volunteer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+/* --- Volunteer Card --- */
+.volunteer-card {
+  background: rgba(15, 25, 40, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.volunteer-card:hover {
+  transform: translateY(-5px);
+  background: rgba(15, 25, 40, 0.9);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 240, 255, 0.15);
+}
+
+/* Left Accent Border based on Status */
+/* Verified */
+.volunteer-card:has(.status-badge:contains("Verified")) {
+  border-left: 4px solid #00ff9d;
+}
+
+/* Pending */
+.volunteer-card:has(.status-badge:contains("Pending")) {
+  border-left: 4px solid #ffea00;
+}
+
+/* --- Card Header --- */
+.volunteer-header {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
 .volunteer-header h3 {
-  color: var(--text-primary);
-  margin: 0 0 5px 0;
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .volunteer-email {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin: 0;
+  color: #8da2b5;
+  font-size: 13px;
+  margin-top: 4px;
 }
 
-.status-badges {
+/* --- Stats Mini-Section --- */
+.volunteer-stats-mini {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 8px;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.status-badge,
-.task-status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+.volunteer-stats-mini .badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
   font-weight: 600;
-  color: white;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.task-status-badge {
-  background: #6c757d;
+/* --- Status Badge --- */
+.status-badge {
+  display: inline-block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  /* Fallback */
 }
 
-.volunteer-details {
-  margin-bottom: 15px;
-}
-
-.skills-section,
-.bio-section {
-  margin-bottom: 15px;
-}
-
-.skills-section strong,
-.bio-section strong {
-  color: var(--text-primary);
-  display: block;
-  margin-bottom: 8px;
-}
-
-.skills-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.skill-tag {
-  background: var(--primary-color);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-}
-
-.no-skills {
-  color: var(--text-secondary);
-  font-style: italic;
-}
-
-.bio-section p {
-  color: var(--text-secondary);
-  margin: 0;
-}
-
+/* --- Action Buttons --- */
 .volunteer-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 15px;
-  border-top: 1px solid var(--border-color);
-}
-
-.volunteer-actions .btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.volunteer-actions .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.volunteer-actions .btn-success {
-  background: #28a745;
-  color: white;
-}
-
-.volunteer-actions .btn-danger {
-  background: #dc3545;
-  color: white;
-}
-
-.volunteer-actions .btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.edit-skills-form {
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
 }
 
-.edit-skills-form label {
-  color: var(--text-primary);
+.btn-success {
+  background: rgba(0, 255, 157, 0.1);
+  border: 1px solid rgba(0, 255, 157, 0.3);
+  color: #00ff9d;
   font-weight: 600;
-  display: block;
-  margin-bottom: 5px;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
+.btn-success:hover {
+  background: rgba(0, 255, 157, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+}
+
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- No Volunteers State --- */
+.no-volunteers {
+  text-align: center;
+  padding: 60px;
+  background: rgba(15, 25, 40, 0.5);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #8da2b5;
+  font-size: 16px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .volunteer-management-container {
-    margin: 20px auto;
-    padding: 0 15px;
+  .volunteer-list {
+    grid-template-columns: 1fr;
   }
 
-  .volunteer-card {
-    padding: 20px;
-  }
-
-  .volunteer-header {
+  .volunteer-management-header {
     flex-direction: column;
-  }
-
-  .volunteer-actions {
-    flex-direction: column;
-  }
-
-  .volunteer-actions .btn {
-    width: 100%;
+    text-align: center;
+    gap: 10px;
   }
 }
-
-

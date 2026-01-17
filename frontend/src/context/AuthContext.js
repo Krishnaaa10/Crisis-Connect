@@ -53,6 +53,36 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, fetchUser, user]);
 
+  // Listen for storage changes from other tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      // Only respond to token changes
+      if (e.key === 'token') {
+        const newToken = e.newValue;
+
+        // If token was removed in another tab, logout this tab
+        if (!newToken) {
+          setUser(null);
+          setToken(null);
+          setLoading(false);
+        }
+        // If token changed to a different value, fetch the new user
+        else if (newToken !== token) {
+          setToken(newToken);
+          // fetchUser will be triggered by the token change in the effect above
+        }
+      }
+    };
+
+    // Add event listener for storage changes
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [token]);
+
   const login = async (email, password) => {
     // Prevent multiple simultaneous login attempts
     if (isLoggingIn.current) {
@@ -62,36 +92,36 @@ export const AuthProvider = ({ children }) => {
     try {
       isLoggingIn.current = true;
       setLoading(true);
-      
+
       const response = await api.post('/api/auth/login', { email, password });
-      
+
       // Check if response has the expected structure
       if (!response.data || !response.data.token || !response.data.user) {
         throw new Error('Invalid response from server');
       }
-      
+
       const { token: newToken, user: userData } = response.data;
-      
+
       // Set token and user immediately
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(userData);
-      
+
       // Reset flags immediately - no delays
       setLoading(false);
       isLoggingIn.current = false;
-      
+
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
-      
+
       // Clean up on error
       setLoading(false);
       isLoggingIn.current = false;
       setUser(null);
       setToken(null);
       localStorage.removeItem('token');
-      
+
       // Handle network errors first
       if (!error.response) {
         // Network error - server not reachable
@@ -100,7 +130,7 @@ export const AuthProvider = ({ children }) => {
         }
         throw error;
       }
-      
+
       // Format error message properly for HTTP errors
       if (error.response?.data) {
         // Handle validation errors
@@ -111,7 +141,7 @@ export const AuthProvider = ({ children }) => {
           error.message = error.response.data.message;
         }
       }
-      
+
       throw error;
     }
   };
@@ -125,36 +155,36 @@ export const AuthProvider = ({ children }) => {
     try {
       isLoggingIn.current = true;
       setLoading(true);
-      
+
       const response = await api.post('/api/auth/register', userData);
-      
+
       // Check if response has the expected structure
       if (!response.data || !response.data.token || !response.data.user) {
         throw new Error('Invalid response from server');
       }
-      
+
       const { token: newToken, user: newUser } = response.data;
-      
+
       // Set token and user immediately
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(newUser);
-      
+
       // Reset flags immediately - no delays
       setLoading(false);
       isLoggingIn.current = false;
-      
+
       return response.data;
     } catch (error) {
       console.error('Register error:', error);
-      
+
       // Clean up on error
       setLoading(false);
       isLoggingIn.current = false;
       setUser(null);
       setToken(null);
       localStorage.removeItem('token');
-      
+
       // Format error message properly
       if (error.response?.data) {
         // Handle validation errors
@@ -165,7 +195,7 @@ export const AuthProvider = ({ children }) => {
           error.message = error.response.data.message;
         }
       }
-      
+
       throw error;
     }
   };
@@ -177,9 +207,42 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
+  const googleLogin = async (credential, role) => {
+    if (isLoggingIn.current) return;
+    try {
+      isLoggingIn.current = true;
+      setLoading(true);
+      const response = await api.post('/api/auth/google', { credential, role });
+
+      if (response.data.status === 'pending_role') {
+        setLoading(false);
+        isLoggingIn.current = false; // Reset flag so next call (with role) works
+        // Don't log in yet, just return the signal
+        return response.data;
+      }
+
+      if (!response.data || !response.data.token || !response.data.user) {
+        throw new Error('Invalid response from server');
+      }
+
+      const { token: newToken, user: userData } = response.data;
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
+      setUser(userData);
+      setLoading(false);
+      isLoggingIn.current = false;
+    } catch (error) {
+      console.error('Google Login error:', error);
+      setLoading(false);
+      isLoggingIn.current = false;
+      throw error;
+    }
+  };
+
   const value = {
     user,
     login,
+    googleLogin,
     register,
     logout,
     loading

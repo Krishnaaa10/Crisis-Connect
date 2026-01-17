@@ -45,10 +45,10 @@ const Home = () => {
   useEffect(() => {
     fetchActiveRequests();
     getCurrentLocation();
-    
+
     // Animate stats counter
     const intervals = [];
-    
+
     // Support: 24/7
     let supportCount = 0;
     const supportInterval = setInterval(() => {
@@ -84,13 +84,13 @@ const Home = () => {
       setStats(prev => ({ ...prev, free: freeCount }));
     }, 20);
     intervals.push(freeInterval);
-    
+
     // Track mouse for parallax effects
     const handleMouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener('mousemove', handleMouseMove);
-    
+
     return () => {
       intervals.forEach(interval => clearInterval(interval));
       window.removeEventListener('mousemove', handleMouseMove);
@@ -172,7 +172,7 @@ const Home = () => {
 
   const handleTriggerAlert = async (e) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast.error('Please login to create an emergency alert');
       navigate('/login');
@@ -311,7 +311,7 @@ const Home = () => {
                 <button onClick={() => navigate('/register')} className="btn-hero-primary">
                   <span>Get Started Free</span>
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
                 <button onClick={() => navigate('/login')} className="btn-hero-secondary">
@@ -322,51 +322,87 @@ const Home = () => {
               <button onClick={() => navigate('/dashboard')} className="btn-hero-primary">
                 <span>Go to Dashboard</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             )}
           </div>
         </div>
         <div className="hero-visual-modern">
-          {/* Top Row - 2 Cards */}
-          <div className="floating-card card-1">
-            <div className="card-icon">🚨</div>
-            <div className="card-text">Emergency Alert</div>
-            <div className="card-subtext">Instant Reporting</div>
-          </div>
-          <div className="floating-card card-2">
-            <div className="card-icon">📍</div>
-            <div className="card-text">Live Tracking</div>
-            <div className="card-subtext">Real-time Maps</div>
-          </div>
-          {/* Middle Row - 1 Card */}
-          <div className="floating-card card-3">
-            <div className="card-icon">👥</div>
-            <div className="card-text">Volunteer Network</div>
-            <div className="card-subtext">24/7 Support</div>
-          </div>
-          {/* Bottom Row - 2 Cards */}
-          <div className="floating-card card-4">
-            <div className="card-icon">⚡</div>
-            <div className="card-text">Fast Response</div>
-            <div className="card-subtext">&lt;5 Min Average</div>
-          </div>
-          <div className="floating-card card-5">
-            <div className="card-icon">🔒</div>
-            <div className="card-text">Secure & Private</div>
-            <div className="card-subtext">Encrypted Data</div>
-          </div>
-          <div className="hero-glow"></div>
-          <div className="connection-lines">
-            <div className="connection-line line-1"></div>
-            <div className="connection-line line-2"></div>
-            <div className="connection-line line-3"></div>
-          </div>
-          <div className="animated-rings">
-            <div className="ring ring-1"></div>
-            <div className="ring ring-2"></div>
-            <div className="ring ring-3"></div>
+          <div className="hologram-effect-container">
+            <div className="live-monitor-container">
+              {/* Monitor Header */}
+              <div className="monitor-header">
+                <div className="status-indicator">
+                  <span className="blink-dot"></span>
+                  LIVE SYSTEM STATUS
+                </div>
+                <div className="system-id">SYS-OVW-01</div>
+              </div>
+
+              {/* Main Monitor Content */}
+              <div className="monitor-content">
+                {/* Left Side: Radar & Core Stats */}
+                <div className="monitor-left">
+                  <div className="radar-container">
+                    <div className="radar-circle"></div>
+                    <div className="radar-sweep"></div>
+                    <div className="radar-blip blip-1"></div>
+                    <div className="radar-blip blip-2"></div>
+                    <div className="radar-center"></div>
+                  </div>
+                  <div className="core-stat-box">
+                    <div className="stat-label">ACTIVE UNITS</div>
+                    <div className="stat-value text-blue">42</div>
+                  </div>
+                </div>
+
+                {/* Right Side: Activity Feed */}
+                <div className="monitor-right">
+                  <div className="feed-header">RECENT EVENTS</div>
+                  <div className="activity-feed">
+                    <div className="feed-item warning">
+                      <span className="time">12:42</span>
+                      <span className="message">⚠️ Flood Warning: Sector 4</span>
+                    </div>
+                    <div className="feed-item success">
+                      <span className="time">12:40</span>
+                      <span className="message">🚑 Unit 7 Arrived at Scene</span>
+                    </div>
+                    <div className="feed-item info">
+                      <span className="time">12:38</span>
+                      <span className="message">📡 Network Sync Complete</span>
+                    </div>
+                    <div className="feed-item warning">
+                      <span className="time">12:35</span>
+                      <span className="message">⚠️ High Water Level: Zone B</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Monitor Footer */}
+              <div className="monitor-footer">
+                <div className="footer-stat">
+                  <span className="label">AVG RESPONSE</span>
+                  <span className="value text-amber">3m 12s</span>
+                </div>
+                <div className="footer-stat">
+                  <span className="label">SIGNAL STR</span>
+                  <span className="value text-green">100%</span>
+                </div>
+              </div>
+
+              {/* Decorative Corners */}
+              <div className="corner-bracket top-left"></div>
+              <div className="corner-bracket top-right"></div>
+              <div className="corner-bracket bottom-left"></div>
+              <div className="corner-bracket bottom-right"></div>
+            </div>
+
+            {/* Holographic Projection Base */}
+            <div className="hologram-base"></div>
+            <div className="hologram-scanner"></div>
           </div>
         </div>
       </section>
@@ -472,7 +508,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Interactive Map Section */}
+      {/* Interactive Map Section - Tactical Satellite Interface */}
       <section className="map-section-modern">
         <div className="container-modern">
           <div className="map-header-modern">
@@ -484,83 +520,106 @@ const Home = () => {
               📍 Track My Location
             </button>
           </div>
-          <div className="map-container-modern">
-            <MapContainer
-              center={mapCenter}
-              zoom={mapZoom}
-              style={{ height: '100%', width: '100%', borderRadius: '16px', minHeight: '600px' }}
-              whenCreated={(mapInstance) => {
-                // Ensure map is fully rendered
-                setTimeout(() => {
-                  mapInstance.invalidateSize();
-                }, 100);
-              }}
-            >
-              <MapController center={mapCenter} zoom={mapZoom} />
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              {/* User Location Marker */}
-              {userLocation && (
-                <Marker
-                  position={userLocation}
-                  icon={new Icon({
-                    iconUrl: `data:image/svg+xml;base64,${btoa(
-                      `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-                        <circle cx="20" cy="20" r="18" fill="#00b7ff" stroke="white" stroke-width="3" opacity="0.9"/>
-                        <circle cx="20" cy="20" r="8" fill="white"/>
-                        <circle cx="20" cy="20" r="4" fill="#00b7ff"/>
-                        <circle cx="20" cy="20" r="18" fill="none" stroke="#00b7ff" stroke-width="2" opacity="0.3">
-                          <animate attributeName="r" values="18;25;18" dur="2s" repeatCount="indefinite"/>
-                          <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
-                        </circle>
-                      </svg>`
-                    )}`,
-                    iconSize: [40, 40],
-                    iconAnchor: [20, 40]
-                  })}
-                >
-                  <Popup>
-                    <div className="popup-content">
-                      <h4 style={{ color: '#00b7ff', marginBottom: '8px' }}>📍 Your Location</h4>
-                      <p style={{ margin: '5px 0', color: '#666' }}>
-                        <strong>Latitude:</strong> {userLocation[0].toFixed(6)}<br/>
-                        <strong>Longitude:</strong> {userLocation[1].toFixed(6)}
-                      </p>
-                    </div>
-                  </Popup>
-                </Marker>
-              )}
-              {/* Emergency Request Markers */}
-              {requests.map((request) => (
-                <Marker
-                  key={request._id}
-                  position={[request.location.latitude, request.location.longitude]}
-                  icon={new Icon({
-                    iconUrl: `data:image/svg+xml;base64,${btoa(
-                      `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
-                        <circle cx="15" cy="15" r="12" fill="${getPriorityColor(request.priority)}" stroke="white" stroke-width="2"/>
-                        <text x="15" y="20" text-anchor="middle" fill="white" font-size="14" font-weight="bold">!</text>
-                      </svg>`
-                    )}`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 30]
-                  })}
-                >
-                  <Popup>
-                    <div className="popup-content">
-                      <h4>{request.title}</h4>
-                      <p>{request.description}</p>
-                      <div className="popup-details">
-                        <span className={`badge badge-${request.priority}`}>{request.priority}</span>
-                        <span className={`badge badge-${request.status}`}>{request.status}</span>
+
+          <div className="tactical-map-interface">
+            {/* HUD Overlays */}
+            <div className="tactical-hud-top">
+              <div className="hud-status">
+                <span className="status-dot"></span> SATELLITE LINK: ACTIVE
+              </div>
+              <div className="hud-coordinates">
+                LAT: {mousePosition.x.toFixed(2)} | LONG: {mousePosition.y.toFixed(2)}
+              </div>
+            </div>
+
+            <div className="tactical-grid-overlay"></div>
+            <div className="corner-bracket-lg top-left"></div>
+            <div className="corner-bracket-lg top-right"></div>
+            <div className="corner-bracket-lg bottom-left"></div>
+            <div className="corner-bracket-lg bottom-right"></div>
+
+            <div className="live-feed-badge">
+              <span className="record-dot"></span> LIVE FEED
+            </div>
+
+            <div className="map-container-tactical">
+              <MapContainer
+                center={mapCenter}
+                zoom={mapZoom}
+                style={{ height: '100%', width: '100%', borderRadius: '4px' }} // Sharp corners for tactical look
+                whenCreated={(mapInstance) => {
+                  setTimeout(() => {
+                    mapInstance.invalidateSize();
+                  }, 100);
+                }}
+              >
+                <MapController center={mapCenter} zoom={mapZoom} />
+                {/* Dark Matter Tiles for Tactical Look */}
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                />
+
+                {/* User Location Marker */}
+                {userLocation && (
+                  <Marker
+                    position={userLocation}
+                    icon={new Icon({
+                      iconUrl: `data:image/svg+xml;base64,${btoa(
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+                          <circle cx="20" cy="20" r="18" fill="rgba(0, 183, 255, 0.2)" stroke="#00b7ff" stroke-width="2"/>
+                          <circle cx="20" cy="20" r="6" fill="#00b7ff">
+                            <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+                          </circle>
+                          <line x1="20" y1="0" x2="20" y2="40" stroke="#00b7ff" stroke-width="1" opacity="0.5"/>
+                          <line x1="0" y1="20" x2="40" y2="20" stroke="#00b7ff" stroke-width="1" opacity="0.5"/>
+                        </svg>`
+                      )}`,
+                      iconSize: [40, 40],
+                      iconAnchor: [20, 20]
+                    })}
+                  >
+                    <Popup>
+                      <div className="popup-tactical">
+                        <h4>📍 TARGET LOCATION</h4>
+                        <p>
+                          LAT: {userLocation[0].toFixed(6)}<br />
+                          LNG: {userLocation[1].toFixed(6)}
+                        </p>
                       </div>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+                    </Popup>
+                  </Marker>
+                )}
+
+                {/* Emergency Request Markers */}
+                {requests.map((request) => (
+                  <Marker
+                    key={request._id}
+                    position={[request.location.latitude, request.location.longitude]}
+                    icon={new Icon({
+                      iconUrl: `data:image/svg+xml;base64,${btoa(
+                        `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+                          <path d="M15 2 L28 28 L2 28 Z" fill="${getPriorityColor(request.priority)}" stroke="white" stroke-width="2"/>
+                          <text x="15" y="24" text-anchor="middle" fill="white" font-size="12" font-weight="bold">!</text>
+                        </svg>`
+                      )}`,
+                      iconSize: [30, 30],
+                      iconAnchor: [15, 30]
+                    })}
+                  >
+                    <Popup>
+                      <div className="popup-tactical">
+                        <h4 style={{ color: getPriorityColor(request.priority) }}>⚠ ALERT: {request.priority.toUpperCase()}</h4>
+                        <div className="popup-divider"></div>
+                        <h5>{request.title}</h5>
+                        <p>{request.description}</p>
+                        <div className="status-badge-popup">STATUS: {request.status.toUpperCase()}</div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
           </div>
         </div>
       </section>

@@ -8,16 +8,14 @@ import './VolunteerManagement.css';
 const VolunteerManagement = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [selectedVolunteer, setSelectedVolunteer] = useState(null);
-  const [editingSkills, setEditingSkills] = useState(false);
-  const [skillsInput, setSkillsInput] = useState('');
+  /* Skills functionality removed as per user request */
 
   // Fetch all volunteers
   const { data: volunteers = [], isLoading: volunteersLoading } = useQuery({
     queryKey: ['allVolunteers'],
     queryFn: async () => {
-      const response = await api.get('/api/volunteer-profiles');
-      return response.data || [];
+      const response = await api.get('/api/admin/volunteers');
+      return response.data?.data || response.data || [];
     },
     enabled: !!user && user.role === 'admin'
   });
@@ -25,66 +23,23 @@ const VolunteerManagement = () => {
   // Update application status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ volunteerId, applicationStatus }) => {
-      return api.put(`/api/volunteer-profiles/${volunteerId}/application-status`, { applicationStatus });
+      // Map frontend status (1=Accepted) to backend isVerified=true
+      const isVerified = applicationStatus === 1;
+      return api.put(`/api/admin/volunteers/${volunteerId}/verify`, { isVerified });
     },
     onSuccess: () => {
       toast.success('Volunteer status updated');
       queryClient.invalidateQueries(['allVolunteers']);
-      queryClient.invalidateQueries(['taskSkills']); // Also invalidate skills query
-      setSelectedVolunteer(null);
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update status');
     }
   });
 
-  // Update skills mutation
-  const updateSkillsMutation = useMutation({
-    mutationFn: async ({ volunteerId, skills }) => {
-      return api.put(`/api/volunteer-profiles/${volunteerId}/skills`, { skills });
-    },
-    onSuccess: () => {
-      toast.success('Skills updated');
-      queryClient.invalidateQueries(['allVolunteers']);
-      queryClient.invalidateQueries(['taskSkills']); // Also invalidate skills query
-      setEditingSkills(false);
-      setSelectedVolunteer(null);
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to update skills');
-    }
-  });
-
   const handleAccept = (volunteerId) => {
-    if (window.confirm('Accept this volunteer?')) {
+    if (window.confirm('Verify this volunteer?')) {
       updateStatusMutation.mutate({ volunteerId, applicationStatus: 1 });
     }
-  };
-
-  const handleReject = (volunteerId) => {
-    if (window.confirm('Reject this volunteer?')) {
-      updateStatusMutation.mutate({ volunteerId, applicationStatus: 2 });
-    }
-  };
-
-  const handleEditSkills = (volunteer) => {
-    setSelectedVolunteer(volunteer);
-    setSkillsInput(volunteer.skills.join(', '));
-    setEditingSkills(true);
-  };
-
-  const handleSaveSkills = () => {
-    if (!selectedVolunteer) return;
-    
-    const skillsArray = skillsInput
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-
-    updateSkillsMutation.mutate({
-      volunteerId: selectedVolunteer._id,
-      skills: skillsArray
-    });
   };
 
   const getStatusText = (status) => {
@@ -121,9 +76,18 @@ const VolunteerManagement = () => {
   }
 
   return (
-    <div className="volunteer-management-container">
+    <div
+      className="volunteer-management-container"
+      style={{
+        backgroundImage: `linear-gradient(rgba(5, 10, 20, 0.85), rgba(5, 10, 20, 0.85)), url(${process.env.PUBLIC_URL}/assets/admin_bg.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        minHeight: '100vh'
+      }}
+    >
       <div className="volunteer-management-header">
-        <h2>👥 Volunteer Management</h2>
+        <h2>👥 Volunteer Management <span style={{ fontSize: '0.6em', background: '#333', padding: '2px 8px', borderRadius: '10px', verticalAlign: 'middle' }}>{volunteers.length} Total</span></h2>
         <p>Manage volunteer applications, accept/reject volunteers, and assign skills</p>
       </div>
 
@@ -136,102 +100,54 @@ const VolunteerManagement = () => {
           {volunteers.map(volunteer => (
             <div key={volunteer._id} className="volunteer-card">
               <div className="volunteer-header">
-                <div>
-                  <h3>{volunteer.userId?.name || 'Unknown'}</h3>
-                  <p className="volunteer-email">{volunteer.userId?.email || ''}</p>
+                <div style={{ flex: 1 }}>
+                  <h3>{volunteer.name || 'Unknown'}</h3>
+                  <p className="volunteer-email">{volunteer.email || ''}</p>
                 </div>
+
+                <div className="volunteer-stats-mini" style={{ marginRight: '20px', textAlign: 'right' }}>
+                  <div style={{ fontSize: '12px', color: '#aaa' }}>TASKS</div>
+                  <div>
+                    <span className="badge" style={{ background: '#007bff', marginRight: '5px' }}>
+                      {volunteer.tasksAccepted || 0} Accepted
+                    </span>
+                    <span className="badge" style={{ background: '#28a745' }}>
+                      {volunteer.tasksCompleted || 0} Resolved
+                    </span>
+                  </div>
+                </div>
+
                 <div className="status-badges">
                   <span
                     className="status-badge"
-                    style={{ backgroundColor: getStatusColor(volunteer.applicationStatus) }}
+                    style={{ backgroundColor: volunteer.isVerified ? '#28a745' : '#ffc107' }}
                   >
-                    {getStatusText(volunteer.applicationStatus)}
-                  </span>
-                  <span className="task-status-badge">
-                    {getTaskStatusText(volunteer.taskStatus)}
+                    {volunteer.isVerified ? 'Verified' : 'Pending'}
                   </span>
                 </div>
-              </div>
-
-              <div className="volunteer-details">
-                <div className="skills-section">
-                  <strong>Skills:</strong>
-                  {volunteer.skills && volunteer.skills.length > 0 ? (
-                    <div className="skills-list">
-                      {volunteer.skills.map((skill, idx) => (
-                        <span key={idx} className="skill-tag">{skill}</span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="no-skills">No skills added</span>
-                  )}
-                </div>
-
-                {volunteer.bio && (
-                  <div className="bio-section">
-                    <strong>Bio:</strong>
-                    <p>{volunteer.bio}</p>
-                  </div>
-                )}
               </div>
 
               <div className="volunteer-actions">
-                {volunteer.applicationStatus === 0 && (
+                {!volunteer.isVerified && (
                   <>
                     <button
                       className="btn btn-success"
                       onClick={() => handleAccept(volunteer._id)}
                       disabled={updateStatusMutation.isPending}
                     >
-                      ✓ Accept
+                      ✓ Verify
                     </button>
-                    <button
+                    {/* Rejection not explicitly supported in simple boolean model, maybe just delete? or leave pending */}
+                    {/* <button
                       className="btn btn-danger"
                       onClick={() => handleReject(volunteer._id)}
                       disabled={updateStatusMutation.isPending}
                     >
                       ✗ Reject
-                    </button>
+                    </button> */}
                   </>
                 )}
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => handleEditSkills(volunteer)}
-                >
-                  ✏️ Edit Skills
-                </button>
               </div>
-
-              {editingSkills && selectedVolunteer?._id === volunteer._id && (
-                <div className="edit-skills-form">
-                  <label>Skills (comma-separated):</label>
-                  <input
-                    type="text"
-                    value={skillsInput}
-                    onChange={(e) => setSkillsInput(e.target.value)}
-                    placeholder="e.g., Rescue Operator, Medical Assistant, Transportation"
-                    style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-                  />
-                  <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleSaveSkills}
-                      disabled={updateSkillsMutation.isPending}
-                    >
-                      Save Skills
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setEditingSkills(false);
-                        setSelectedVolunteer(null);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>

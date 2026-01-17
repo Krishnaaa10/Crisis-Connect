@@ -40,15 +40,15 @@ const TaskManagement = () => {
     queryFn: async () => {
       try {
         const response = await api.get('/api/tasks/incidents');
-        console.log('TaskManagement: Fetched verified incidents:', response.data);
-        return response.data || [];
+        // Check structure
+        return response.data?.data || response.data || [];
       } catch (error) {
         console.error('TaskManagement: Error fetching incidents:', error);
         throw error;
       }
     },
     enabled: !!user && user.role === 'admin',
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchInterval: 5000,
   });
 
   // Fetch ALL volunteers (no restrictions)
@@ -58,7 +58,7 @@ const TaskManagement = () => {
       try {
         // Fetch ALL volunteers regardless of status or skills
         const response = await api.get('/api/volunteer-profiles');
-        return response.data || [];
+        return response.data?.data || response.data || [];
       } catch (error) {
         console.error('TaskManagement: Error fetching volunteers:', error);
         return [];
@@ -167,17 +167,7 @@ const TaskManagement = () => {
         <h2>📋 Task Management</h2>
         <p>Assign tasks to volunteers based on verified incidents</p>
         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-          <button
-            onClick={() => {
-              refetchIncidents();
-              refetchSkills();
-              toast.info('Refreshing data...');
-            }}
-            className="btn btn-secondary"
-            style={{ fontSize: '14px', padding: '8px 16px' }}
-          >
-            🔄 Refresh Data
-          </button>
+          {/* Auto-refreshes enabled */}
         </div>
         <div style={{ marginTop: '10px', padding: '10px', background: '#d4edda', borderRadius: '6px', fontSize: '14px', border: '1px solid #c3e6cb' }}>
           <strong>✅ All volunteers can be assigned tasks</strong> - No restrictions on application status, task status, or skills.

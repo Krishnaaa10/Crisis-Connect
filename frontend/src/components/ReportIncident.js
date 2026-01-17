@@ -19,9 +19,9 @@ const ReportIncident = () => {
 
   // Check if running on HTTPS or localhost
   useEffect(() => {
-    const isSecureContext = window.isSecureContext || 
-      window.location.protocol === 'https:' || 
-      window.location.hostname === 'localhost' || 
+    const isSecureContext = window.isSecureContext ||
+      window.location.protocol === 'https:' ||
+      window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1';
     if (!isSecureContext && navigator.geolocation) {
       console.warn('ReportIncident: Geolocation may require HTTPS. Current protocol:', window.location.protocol);
@@ -153,135 +153,95 @@ const ReportIncident = () => {
   ];
 
   return (
-    <div className="report-incident-container">
-      <div className="report-incident-card">
+    <div className="report-incident-page" style={{
+      height: '100vh',
+      overflow: 'hidden',
+      padding: '100px 20px 20px', // Increased top padding to clear navbar
+      background: `linear-gradient(rgba(5, 10, 20, 0.92), rgba(5, 10, 20, 0.92)), url(${process.env.PUBLIC_URL}/assets/admin_bg.png)`, // Full page BG
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}>
+      <div className="report-incident-card" style={{
+        background: `linear-gradient(rgba(5, 10, 20, 0.95), rgba(5, 10, 20, 0.95)), url(${process.env.PUBLIC_URL}/assets/report_modal_bg.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        border: '1px solid rgba(255, 51, 102, 0.5)',
+        boxShadow: '0 0 50px rgba(255, 51, 102, 0.2)',
+        borderRadius: '16px',
+        maxWidth: '800px',
+        width: '100%'
+      }}>
         <div className="report-incident-header">
-          <h2>🚨 Report Incident</h2>
-          <p>Report an emergency or disaster incident. Admin will verify and assign volunteers.</p>
+          <h2 style={{
+            color: '#fff',
+            textTransform: 'uppercase',
+            letterSpacing: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px'
+          }}>
+            🚨 Unified Incident Report
+          </h2>
+          <p style={{ color: '#aaa' }}>Secure tactical channel for civilian emergency reporting.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="report-incident-form">
-          <div className="form-group">
-            <label>Incident Type *</label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select incident type</option>
-              {incidentTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
+          <div className="form-group-grid">
+            <div className="form-group">
+              <label>Incident Type</label>
+              <select name="type" value={formData.type} onChange={handleChange} required>
+                <option value="">Select Type...</option>
+                {incidentTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Location Name</label>
+              <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="e.g. Sector 4 Plaza" required />
+            </div>
+          </div>
+
+          <div className="form-group-grid">
+            <div className="form-group">
+              <label>Severity Level (1-5)</label>
+              <select name="severity" value={formData.severity} onChange={handleChange} required>
+                {[1, 2, 3, 4, 5].map(num => <option key={num} value={num}>{num} - {num === 5 ? 'Critical' : num === 1 ? 'Low' : 'Standard'}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Coordinates</label>
+              <button type="button" onClick={handleGetLocation} className="btn-detect">
+                {gettingLocation ? '🛰️ Linking Satellites...' : '📍 GPS Auto-Detect'}
+              </button>
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Location *</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="Enter location address"
-              required
-            />
+            <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+              <input type="number" placeholder="Lat" value={formData.latitude} readOnly style={{ background: 'rgba(0,0,0,0.5)', color: '#00ff9d' }} />
+              <input type="number" placeholder="Long" value={formData.longitude} readOnly style={{ background: 'rgba(0,0,0,0.5)', color: '#00ff9d' }} />
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Severity *</label>
-            <select
-              name="severity"
-              value={formData.severity}
-              onChange={handleChange}
-              required
-            >
-              <option value={1}>1 - Very Low</option>
-              <option value={2}>2 - Low</option>
-              <option value={3}>3 - Medium</option>
-              <option value={4}>4 - High</option>
-              <option value={5}>5 - Very High</option>
-            </select>
-            <small>Select the severity level (1-5)</small>
-          </div>
-
-          <div className="form-group">
-            <label>Description *</label>
+            <label>Tactical Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Describe the incident in detail..."
-              rows="5"
+              placeholder="Describe situation parameters..."
+              rows="4"
               required
             />
           </div>
 
-          <div className="form-group">
-            <label>Location Coordinates *</label>
-            <div style={{ marginBottom: '10px' }}>
-              <button
-                type="button"
-                onClick={handleGetLocation}
-                className="btn btn-secondary"
-                disabled={gettingLocation}
-                style={{ marginRight: '10px' }}
-              >
-                {gettingLocation ? '🔄 Getting Location...' : '📍 Get My Location'}
-              </button>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                Or enter coordinates manually below
-              </span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-              <div>
-                <label style={{ fontSize: '12px', display: 'block', marginBottom: '5px' }}>Latitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  placeholder="e.g., 28.6139"
-                  value={formData.latitude !== 0 ? formData.latitude : ''}
-                  onChange={(e) => {
-                    const lat = parseFloat(e.target.value) || 0;
-                    setFormData({ ...formData, latitude: lat });
-                  }}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: '12px', display: 'block', marginBottom: '5px' }}>Longitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  placeholder="e.g., 77.2090"
-                  value={formData.longitude !== 0 ? formData.longitude : ''}
-                  onChange={(e) => {
-                    const lng = parseFloat(e.target.value) || 0;
-                    setFormData({ ...formData, longitude: lng });
-                  }}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </div>
-            </div>
-            {formData.latitude !== 0 && formData.longitude !== 0 && (
-              <p style={{ fontSize: '12px', color: '#28a745', marginTop: '5px' }}>
-                ✓ Location captured: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
-              </p>
-            )}
-            {formData.latitude === 0 && formData.longitude === 0 && (
-              <p style={{ fontSize: '12px', color: '#dc3545', marginTop: '5px' }}>
-                ⚠ Please capture your location or enter coordinates manually
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={submitting}
-            style={{ width: '100%', marginTop: '20px' }}
-          >
-            {submitting ? 'Submitting...' : 'Submit Incident Report'}
+          <button type="submit" className="submit-btn-tactical" disabled={submitting}>
+            {submitting ? 'TRANSMITTING...' : '⚠️ TRANSMIT ALERT'}
           </button>
         </form>
       </div>

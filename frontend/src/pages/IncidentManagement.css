@@ -1,177 +1,262 @@
+/* Inherit main background from inline style or global */
 .incident-management-container {
   max-width: 1400px;
-  margin: 40px auto;
+  margin: 0 auto;
+  /* Removed top margin as padding is handled by container */
   padding: 0 20px;
 }
 
 .incident-management-page {
-  min-height: calc(100vh - 80px);
-  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
-  background-image: url('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=1920&h=1080&fit=crop');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-blend-mode: overlay;
-  padding: 40px 20px;
+  /* Background handled inline for asset path safety */
+  color: #e0e6ed;
+  font-family: 'Inter', sans-serif;
   position: relative;
 }
 
-.incident-management-page::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 0;
-  pointer-events: none;
-}
-
-.incident-management-page > * {
-  position: relative;
-  z-index: 1;
-}
-
+/* --- Header --- */
 .incident-management-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  padding: 20px 30px;
+  background: rgba(10, 15, 30, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .incident-management-header h2 {
-  color: var(--text-primary);
-  margin-bottom: 10px;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #fff, #00f0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .incident-management-header p {
-  color: var(--text-secondary);
+  color: #8da2b5;
+  margin-top: 10px;
+  font-size: 15px;
 }
 
+/* --- Sections --- */
 .incident-sections {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 30px;
 }
 
+/* --- Section Panels --- */
 .pending-incidents-section,
 .all-incidents-section {
-  background: var(--card-bg);
+  background: rgba(15, 25, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Subtle glass border */
   border-radius: 12px;
   padding: 25px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.pending-incidents-section {
+  border-top: 4px solid #ffea00;
+  /* Yellow top accent for pending */
+}
+
+.all-incidents-section {
+  border-top: 4px solid #00f0ff;
+  /* Blue top accent for all */
 }
 
 .pending-incidents-section h3,
 .all-incidents-section h3 {
-  color: var(--text-primary);
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--border-color);
+  color: #fff;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.no-incidents {
-  text-align: center;
-  color: var(--text-secondary);
-  padding: 40px;
-}
-
+/* --- Incident Cards --- */
 .incident-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  max-height: 700px;
+  gap: 20px;
+  max-height: 750px;
   overflow-y: auto;
+  padding-right: 10px;
+  /* Space for scrollbar */
+}
+
+/* Custom Scrollbar */
+.incident-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.incident-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.incident-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
 }
 
 .incident-card {
-  background: var(--bg-secondary);
+  background: rgba(10, 15, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 20px;
-  border-left: 4px solid var(--primary-color);
+  border-left: 4px solid #4a90e2;
+  /* Default blue */
+  transition: transform 0.2s, background 0.2s;
+}
+
+.incident-card:hover {
+  transform: translateY(-2px);
+  background: rgba(20, 30, 50, 0.9);
 }
 
 .incident-card.pending {
   border-left-color: #ffc107;
+  /* Warning Yellow */
+  background: rgba(255, 193, 7, 0.05);
+  /* Slight tint */
 }
 
+/* --- Card Header --- */
 .incident-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 15px;
 }
 
 .incident-header h4 {
-  color: var(--text-primary);
+  color: #fff;
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
+/* --- Badges --- */
 .status-badge,
 .severity-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  /* More angular tech look */
+  font-size: 11px;
+  font-weight: 700;
   color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+/* --- Card Content --- */
 .incident-location {
-  color: var(--text-primary);
-  font-weight: 600;
-  margin-bottom: 8px;
+  color: #00f0ff;
+  font-weight: 500;
+  margin-bottom: 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .incident-description {
-  color: var(--text-secondary);
-  margin-bottom: 15px;
-  line-height: 1.6;
+  color: #e0e6ed;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .incident-meta {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
+  font-size: 12px;
+  color: #8da2b5;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
 }
 
 .incident-meta p {
   margin: 5px 0;
 }
 
+.incident-meta strong {
+  color: #aebfd1;
+}
+
+/* --- Actions --- */
 .incident-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .incident-actions .btn {
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 10px 18px;
+  font-size: 13px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
-  transition: opacity 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  flex: 1;
+  /* Stretch buttons */
 }
 
 .incident-actions .btn-success {
-  background: #28a745;
-  color: white;
+  background: rgba(0, 255, 157, 0.15);
+  border: 1px solid rgba(0, 255, 157, 0.4);
+  color: #00ff9d;
+}
+
+.incident-actions .btn-success:hover {
+  background: rgba(0, 255, 157, 0.25);
+  box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
 }
 
 .incident-actions .btn-secondary {
-  background: #6c757d;
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.incident-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .incident-actions .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  filter: grayscale(100%);
 }
 
+.no-incidents {
+  text-align: center;
+  color: #6c829d;
+  padding: 60px 20px;
+  font-style: italic;
+  font-size: 15px;
+}
+
+/* Responsive */
 @media (max-width: 1024px) {
   .incident-sections {
     grid-template-columns: 1fr;
@@ -179,24 +264,12 @@
 }
 
 @media (max-width: 768px) {
-  .incident-management-container {
-    margin: 20px auto;
-    padding: 0 15px;
-  }
-
-  .pending-incidents-section,
-  .all-incidents-section {
-    padding: 20px;
-  }
-
   .incident-card {
     padding: 15px;
   }
 
   .incident-header {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 10px;
   }
 }
-
-

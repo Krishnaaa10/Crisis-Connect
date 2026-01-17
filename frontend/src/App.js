@@ -15,6 +15,7 @@ import News from './pages/News';
 import Alerts from './pages/Alerts';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
+import AdminLogin from './pages/AdminLogin';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import MapView from './pages/MapView';
@@ -32,102 +33,103 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-        <div className="App">
-          <Navbar />
-          <AlertBanner />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/map"
-              element={
-                <PrivateRoute>
-                  <MapView />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <PrivateRoute requiredRole="admin">
-                  <AdminDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/volunteer"
-              element={
-                <PrivateRoute requiredRole={['volunteer', 'admin']}>
-                  <VolunteerDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/alert/:id"
-              element={
-                <PrivateRoute requiredRole={['volunteer', 'admin']}>
-                  <AlertDetails />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/report-incident"
-              element={
-                <PrivateRoute requiredRole="civilian">
-                  <ReportIncident />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin/incidents"
-              element={
-                <PrivateRoute requiredRole="admin">
-                  <IncidentManagement />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin/tasks"
-              element={
-                <PrivateRoute requiredRole="admin">
-                  <TaskManagement />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin/volunteers"
-              element={
-                <PrivateRoute requiredRole="admin">
-                  <VolunteerManagement />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/volunteer/tasks"
-              element={
-                <PrivateRoute requiredRole={['volunteer', 'admin']}>
-                  <VolunteerTaskView />
-                </PrivateRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-          <ToastContainer position="top-right" autoClose={3000} />
-        </div>
-      </Router>
+          <div className="App">
+            <Navbar />
+            <AlertBanner />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/map"
+                element={
+                  <PrivateRoute>
+                    <MapView />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/volunteer"
+                element={
+                  <PrivateRoute requiredRole={['volunteer', 'admin']}>
+                    <VolunteerDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/alert/:id"
+                element={
+                  <PrivateRoute requiredRole={['volunteer', 'admin']}>
+                    <AlertDetails />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/report-incident"
+                element={
+                  <PrivateRoute requiredRole="civilian">
+                    <ReportIncident />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/incidents"
+                element={
+                  <PrivateRoute requiredRole="admin">
+                    <IncidentManagement />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/tasks"
+                element={
+                  <PrivateRoute requiredRole="admin">
+                    <TaskManagement />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/volunteers"
+                element={
+                  <PrivateRoute requiredRole="admin">
+                    <VolunteerManagement />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/volunteer/tasks"
+                element={
+                  <PrivateRoute requiredRole={['volunteer', 'admin']}>
+                    <VolunteerTaskView />
+                  </PrivateRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+            <ToastContainer position="top-right" autoClose={3000} />
+          </div>
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   );
